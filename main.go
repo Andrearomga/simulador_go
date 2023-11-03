@@ -7,5 +7,5 @@ import (
 )
 
 func main() {
-	views.IniciarVentana()
+	views.MostrarEstacionamiento()
 }

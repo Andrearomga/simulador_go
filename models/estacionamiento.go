@@ -4,46 +4,55 @@ import (
 	"sync"
 )
 
+const (
+	CapacidadMaxima = 20
+)
+
 type Estacionamiento struct {
-	capacidad          int
-	autos              chan Auto
-	EspacioDisponible  chan bool
-	mutex              sync.Mutex // Mutex para sincronizar el acceso a la entrada/salida del estacionamiento.
-	actualizarVista    func(int)  // Función para actualizar la vista
+	sem     *sync.WaitGroup
+	cajones []sync.Mutex
+	contar  int
+	mux     sync.Mutex
 }
 
-func NuevoEstacionamiento(capacidad int, actualizarVista func(int)) *Estacionamiento {
+func NuevoEstacionamiento(capacidad int) *Estacionamiento {
 	return &Estacionamiento{
-		capacidad:         capacidad,
-		autos:             make(chan Auto, capacidad),
-		EspacioDisponible: make(chan bool, capacidad),
-		actualizarVista:   actualizarVista,
+		sem:     &sync.WaitGroup{},
+		cajones: make([]sync.Mutex, capacidad),
 	}
 }
 
-func (e *Estacionamiento) Entrar(a Auto) bool {
-	e.mutex.Lock() // Bloquear la entrada/salida del estacionamiento.
-	defer e.mutex.Unlock()
+func (e *Estacionamiento) AgregarAuto(a Auto) {
+	e.mux.Lock()
+	if e.contar >= CapacidadMaxima {
+		println("El estacionamiento está lleno. Esperando...")
+		e.mux.Unlock()
+		return
+	}
+	e.contar++
+	e.mux.Unlock()
 
-	if len(e.autos) < e.capacidad {
-		e.autos <- a
-		e.actualizarVista(len(e.autos)) // Actualizar la vista
+	e.sem.Add(1)
+	e.sem.Wait()
+	for i := range e.cajones {
+		if e.IntentarEstacionar(i) {
+			go a.Estacionar(e, i)
+			break
+		}
+	}
+}
+
+func (e *Estacionamiento) IntentarEstacionar(indice int) bool {
+	if e.cajones[indice].TryLock() {
 		return true
 	}
 	return false
 }
 
-func (e *Estacionamiento) Salir(a Auto) {
-	e.mutex.Lock() // Bloquear la entrada/salida del estacionamiento.
-	defer e.mutex.Unlock()
-
-	for i := 0; i < len(e.autos); i++ {
-		if auto := <-e.autos; auto.ID == a.ID {
-			e.EspacioDisponible <- true
-			e.actualizarVista(len(e.autos)) // Actualizar la vista
-			break
-		} else {
-			e.autos <- auto // Si el auto que salió del canal no es el que queremos, lo devolvemos al canal.
-		}
-	}
+func (e *Estacionamiento) LiberarCajon(indice int) {
+	e.cajones[indice].Unlock()
+	e.mux.Lock()
+	e.contar--
+	e.mux.Unlock()
+	e.sem.Done()
 }
