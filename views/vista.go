@@ -1,68 +1,63 @@
 package views
 
 import (
-	"simulador/models"
-    "fyne.io/fyne/v2/app"
     "fyne.io/fyne/v2/canvas"
     "fyne.io/fyne/v2/container"
+    "fyne.io/fyne/v2"
+    "fyne.io/fyne/v2/app"
     "fyne.io/fyne/v2/widget"
-    "fyne.io/fyne/v2/layout"
-    "time" // Asegúrate de que esta línea esté presente para usar time
-	"fyne.io/fyne/v2"
+    "image/color"
+    "simulador/models" // Asegúrate de usar el paquete correcto para tus modelos
 )
 
 func IniciarVentana() {
-    myApp := app.New()
-    myWindow := myApp.NewWindow("Estacionamiento")
-    myWindow.SetFixedSize(true)
+    a := app.New()
+    w := a.NewWindow("Estacionamiento")
 
-    // Cargar la imagen del estacionamiento
-    estacionamientoImagen := canvas.NewImageFromFile("assets/estacion.png")
-    estacionamientoImagen.FillMode = canvas.ImageFillOriginal
+    espacios := make([]fyne.CanvasObject, 20)
+for i := range espacios {
+    rect := canvas.NewRectangle(color.RGBA{R: 100, G: 100, B: 100, A: 255})
+    rect.SetMinSize(fyne.NewSize(50, 20)) // Cambiar el ancho a 50 y el alto a 20
+    espacios[i] = rect
+}
 
-    // Cargar la imagen del carrito
-    autoImagen := canvas.NewImageFromFile("assets/carro220.png")
-    autoImagen.FillMode = canvas.ImageFillOriginal
+	autosImagenes := []string{
+		"assets/carro220.png",
+		//"assets/carro2.png",
+		// Agrega más rutas de imágenes según sea necesario
+	}
 
-    vista := container.NewHBox(layout.NewSpacer(), estacionamientoImagen, autoImagen, layout.NewSpacer())
-    iniciarBoton := widget.NewButton("Iniciar", func() {
-        // Iniciar la simulación de llegada continua de vehículos desde el paquete models
-        go models.SimularEstacionamiento(100, 20)
+    // Declarar parkingContainer antes de actualizarVista
+    var parkingContainer *fyne.Container
 
-        // Coordenadas iniciales del carro
-        posX := float32(0)
-        posY := float32(0)
+	// Función para actualizar la vista
+	actualizarVista := func(numAutos int) {
+		for i := 0; i < numAutos; i++ {
+			auto := canvas.NewImageFromFile(autosImagenes[i % len(autosImagenes)])
+			auto.FillMode = canvas.ImageFillOriginal
+			espacios[i] = auto
+		}
+		for i := numAutos; i < len(espacios); i++ {
+			rect := canvas.NewRectangle(color.RGBA{R: 100, G: 100, B: 100, A: 255})
+			rect.SetMinSize(fyne.NewSize(50, 20)) // Cambiar el ancho a 50 y el alto a 20
+			espacios[i] = rect
+		}
+		canvas.Refresh(parkingContainer)
+	}
 
-        // Coordenadas de estacionamiento
-        cajonX := float32(130) // Coordenada X del cajón
-        cajonY := float32(70) // Coordenada Y del cajón
+    // Inicializar parkingContainer después de actualizarVista
+    parkingContainer = container.NewGridWrap(fyne.NewSize(60, 100), espacios...)
 
-        // Crear una función para mover el carro hacia el cajón
-        moverHaciaCajon := func() {
-            for {
-                if posX < cajonX {
-                    posX += 2
-                } else if posY < cajonY {
-                    posY += 2
-                } else {
-                    // El carro ha llegado al cajón
-                    break
-                }
+	// Botón para iniciar la simulación
+	iniciarButton := widget.NewButton("Iniciar", func() {
+		go models.Simulacion(actualizarVista)
+	})
 
-                // Actualizar la posición de la imagen del carro en la vista
-                autoImagen.Move(fyne.NewPos(posX, posY))
-                myWindow.Canvas().Refresh(autoImagen)
-                time.Sleep(100 * time.Millisecond) // Controla la velocidad de movimiento
-            }
-        }
+    // Crear un contenedor vertical (VBox) para organizar el contenedor de estacionamiento y la imagen del auto
+    vboxContainer := container.NewVBox(parkingContainer, iniciarButton)
 
-        // Iniciar la función de movimiento hacia el cajón en segundo plano
-        go moverHaciaCajon()
-    })
+    // Agregar el contenedor al contenido de la ventana
+    w.SetContent(vboxContainer)
 
-    vistaConBoton := container.NewVBox(iniciarBoton, vista)
-
-    myWindow.SetContent(vistaConBoton)
-    myWindow.Resize(fyne.NewSize(500, estacionamientoImagen.Size().Height))
-    myWindow.ShowAndRun()
+	w.ShowAndRun()
 }
