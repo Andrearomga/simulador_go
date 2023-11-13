@@ -1,82 +1,88 @@
-// estacionamiento.go
 package models
 
 import (
-	"sync"
+	"math/rand"
 	"time"
+	"fmt"
+	"sync"
 )
+
+type Estacionamiento struct {
+	Cajones []bool
+	muxCajones sync.Mutex
+	puertaEntrada sync.Mutex
+	puertaSalida sync.Mutex
+	semEspaciosDisponibles chan bool
+}
 
 const (
 	CapacidadMaxima = 20
 )
 
-// Estacionamiento representa el estacionamiento con cajones y una puerta compartida.
-type Estacionamiento struct {
-	cajones []bool
-	mux     sync.Mutex
-	puerta  sync.Mutex
-}
-
-// NuevoEstacionamiento crea un nuevo estacionamiento con la capacidad dada.
-func NuevoEstacionamiento(capacidad int) *Estacionamiento {
+func NuevoEstacionamiento() *Estacionamiento {
 	return &Estacionamiento{
-		cajones: make([]bool, 0, capacidad),
+		Cajones: make([]bool, CapacidadMaxima),
+		semEspaciosDisponibles: make(chan bool, CapacidadMaxima),
 	}
 }
 
-// EstacionamientoLleno verifica si el estacionamiento está lleno.
-func (e *Estacionamiento) EstacionamientoLleno() bool {
-	return len(e.cajones) >= CapacidadMaxima
+func (e *Estacionamiento) LlegadaVehiculo(id int) {
+	fmt.Printf("Vehículo %d llegando al estacionamiento\n", id)
+
+	// Esperar a que haya espacio en el estacionamiento
+	<-e.semEspaciosDisponibles
+
+	e.puertaEntrada.Lock()
+	fmt.Printf("Vehículo %d entrando al estacionamiento\n", id)
+
+	indiceCajon := e.intentarEstacionar()
+	if indiceCajon != -1 {
+		fmt.Printf("Vehículo %d estacionado en el cajón %d\n", id, indiceCajon)
+		e.ocuparCajon(indiceCajon)
+		tiempoAleatorio := time.Duration(rand.Intn(5) + 1)
+		time.Sleep(tiempoAleatorio * time.Second)
+		e.desocuparCajon(indiceCajon)
+		fmt.Printf("Vehículo %d ha dejado el cajón %d\n", id, indiceCajon)
+	} else {
+		fmt.Printf("Vehículo %d no pudo encontrar un cajón disponible y se va\n", id)
+	}
+
+	e.puertaEntrada.Unlock()
+
+	e.puertaSalida.Lock()
+	fmt.Printf("Vehículo %d saliendo del estacionamiento\n", id)
+	e.puertaSalida.Unlock()
+
+	// Indicar que hay un espacio disponible
+	e.semEspaciosDisponibles <- true
 }
 
-// IntentarEstacionar intenta encontrar un cajón disponible en el estacionamiento.
-func (e *Estacionamiento) IntentarEstacionar() int {
-	e.mux.Lock()
-	defer e.mux.Unlock()
-
-	for i, ocupado := range e.cajones {
+func (e *Estacionamiento) estacionamientoLleno() bool {
+	for _, ocupado := range e.Cajones {
 		if !ocupado {
-			e.cajones[i] = true
+			return false
+		}
+	}
+	return true
+}
+
+func (e *Estacionamiento) intentarEstacionar() int {
+	for i, ocupado := range e.Cajones {
+		if !ocupado {
 			return i
 		}
 	}
 	return -1
 }
 
-// LiberarCajon libera el cajón indicado en el estacionamiento.
-func (e *Estacionamiento) LiberarCajon(indice int) {
-	e.mux.Lock()
-	defer e.mux.Unlock()
-
-	if indice >= 0 && indice < len(e.cajones) {
-		e.cajones[indice] = false
-		println("Auto liberó el cajón:", indice)
-	} else {
-		println("Intento de liberar un cajón inválido:", indice)
-	}
+func (e *Estacionamiento) ocuparCajon(indice int) {
+	e.muxCajones.Lock()
+	defer e.muxCajones.Unlock()
+	e.Cajones[indice] = true
 }
 
-// AgregarAuto intenta agregar un auto al estacionamiento.
-func (e *Estacionamiento) AgregarAuto(a Auto) {
-	e.puerta.Lock()
-	defer e.puerta.Unlock()
-
-	e.mux.Lock()
-	defer e.mux.Unlock()
-
-	// Esperar hasta que haya cajones disponibles
-	for e.EstacionamientoLleno() {
-		println("El estacionamiento está lleno. Esperando...")
-		e.mux.Unlock()
-		time.Sleep(time.Second)
-		e.mux.Lock()
-	}
-
-	// Intentar estacionar el auto
-	indice := e.IntentarEstacionar()
-	if indice != -1 {
-		println("Auto estacionado en el cajón:", indice)
-	} else {
-		println("Error al intentar estacionar el auto. No se encontró un cajón disponible.")
-	}
+func (e *Estacionamiento) desocuparCajon(indice int) {
+	e.muxCajones.Lock()
+	defer e.muxCajones.Unlock()
+	e.Cajones[indice] = false
 }

@@ -1,11 +1,9 @@
 package main
 
-
-
 import (
-	"simulador/views"
+	"simulador/views" // Reemplaza "tu_paquete" con el nombre de tu paquete
 )
 
 func main() {
-	views.MostrarEstacionamiento()
+	views.SimulacionEstacionamiento()
 }

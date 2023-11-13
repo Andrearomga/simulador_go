@@ -2,28 +2,33 @@ package models
 
 import (
 	"fmt"
+	"sync"
 	"math/rand"
 	"time"
-	"image/color"
+	"fyne.io/fyne/v2/canvas"
 )
 
-// CrearAutos crea continuamente autos y los agrega al estacionamiento.
-func CrearAutos(estacionamiento *Estacionamiento, updateViewFunc func(id int, clr color.Color)) {
-	for i := 1; ; i++ {
-		auto := Auto{ID: i}
-		if estacionamiento.EstacionamientoLleno() {
-			fmt.Println("El estacionamiento está lleno. Esperando...")
-			time.Sleep(5 * time.Second) // Esperar antes de intentar nuevamente
-			continue
-		}
-		estacionamiento.AgregarAuto(auto)
+const (
+	NumVehiculos = 100
+)
 
-		// Simular tiempo de llegada con distribución de Poisson
-		lambda := 0.2
-		sleepTime := rand.ExpFloat64() / lambda
-		time.Sleep(time.Duration(sleepTime) * time.Second)
+func CrearVehiculos(sem *sync.Mutex, done chan<- bool, carros []*canvas.Image, updates chan<- string) {
+	for i := 1; i <= NumVehiculos; i++ {
+		v := &Vehiculo{id: i}
+		v.Llegar()
 
-		// Llamada a la función de actualización de la vista (por implementar)
-		updateViewFunc(i, color.RGBA{R: 255, G: 255, B: 255, A: 255})
+		// Mostrar la imagen del carro en la GUI
+		carros[i-1].Show()
+
+		go func(v *Vehiculo) {
+			v.EntrarAlEstacionamiento(sem)
+			v.Estacionar()
+			updates <- fmt.Sprintf("Vehículo %d estacionado", v.id)
+		}(v)
+
+		interval := time.Duration(rand.ExpFloat64()*float64(time.Second))
+		time.Sleep(interval)
 	}
+
+	done <- true
 }
