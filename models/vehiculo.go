@@ -47,13 +47,14 @@ func (e *Estacionamiento) estacionar(id int, carro *canvas.Circle) (estacionado 
 			e.Espacios[i] = true
 			carro.Move(fyne.NewPos(float32(160+20*e.entrada), 200))
 			e.entrada--
-			fmt.Printf("Carro %d estacionado en espacio %d.\n", id, i)
+			fmt.Printf("Carro %d estacionado en espacio %d.\n", id, i+1) // Suma 1 al índice
 			moverVehiculo(carro, i)
 			return true
 		}
 	}
 	return false
 }
+
 
 func (e *Estacionamiento) VehiculoEntra(id int, wg *sync.WaitGroup, w *fyne.Container) {
 	defer wg.Done()
@@ -84,13 +85,11 @@ func crearVehiculo(w *fyne.Container) *canvas.Circle {
 func moverVehiculo(carro *canvas.Circle, espacio int) {
 	x := 200
 	y := 200
-	if espacio != 0 {
-		x = 50*espacio + x
-	}
-	if espacio > 10 {
-		x = 65*(espacio-10) + x
-		y = 400
-	}
+
+	// Calcula las coordenadas en línea para una sola fila
+	x = 40*espacio + x
+	y = 400
+
 	carro.Move(fyne.NewPos(float32(x), float32(y)))
 }
 

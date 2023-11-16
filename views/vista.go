@@ -1,7 +1,5 @@
 package views
 
-
-
 import (
 	"image/color"
 	"math/rand"
@@ -15,21 +13,29 @@ import (
 	"fyne.io/fyne/v2/app"
 )
 
+const (
+	espacioWidth     = 40
+	espacioHeight    = 20
+	espacioSeparador = 10
+)
+
 func IniciarLlegada(numVehiculos int) {
 	appMain := app.New()
 	rand.Seed(time.Now().UnixNano())
 
 	park := models.NuevoEstacionamiento(20)
-	ventana, contenedor := configurarVentana(appMain)
+	ventana, contenedor := configurarVentana(appMain, numVehiculos, park)
 	ejecutarEstacionamiento(park, contenedor, numVehiculos)
 
 	ventana.ShowAndRun()
 }
 
-func configurarVentana(appMain fyne.App) (fyne.Window, *fyne.Container) {
+func configurarVentana(appMain fyne.App, numVehiculos int, park *models.Estacionamiento) (fyne.Window, *fyne.Container) {
 	vent := appMain.NewWindow("Estacionamiento Up xD")
 	vent.Resize(fyne.NewSize(800, 500))
-	vent.SetFixedSize(true)
+
+	// Habilita la opción de maximizar la ventana y muestra el ícono de la ventana
+	vent.SetMaster()
 
 	imgRecurso, _ := fyne.LoadResourceFromPath("assets/bg.png")
 	img := canvas.NewImageFromResource(imgRecurso)
@@ -38,18 +44,18 @@ func configurarVentana(appMain fyne.App) (fyne.Window, *fyne.Container) {
 	cont := container.NewWithoutLayout(img)
 
 	// Agrega círculos y rectángulos para representar los espacios del estacionamiento
-	numEspacios := 20
-	espacioWidth := 40
-	for i := 0; i < numEspacios; i++ {
+	for i := 0; i < 20; i++ { // Mantenido en 20 para tener una sola fila
 		circulo := canvas.NewCircle(color.Black)
 		circulo.Resize(fyne.NewSize(20, 20))
 		cont.Add(circulo)
-		circulo.Move(fyne.NewPos(float32(160+20*i), 200))
+		moverVehiculo(circulo, i)
+	}
 
+	for i := 0; i < 20; i++ { // Mantenido en 20 para tener una sola fila
 		rectangulo := canvas.NewRectangle(color.RGBA{R: 0, G: 255, B: 0, A: 150}) // Color verde semi-transparente
-		rectangulo.Resize(fyne.NewSize(float32(espacioWidth), 20))
+		rectangulo.Resize(fyne.NewSize(espacioWidth, espacioHeight))
 		cont.Add(rectangulo)
-		rectangulo.Move(fyne.NewPos(float32(160+20*i), 200))
+		moverVehiculo(rectangulo, i)
 	}
 
 	vent.SetContent(cont)
@@ -67,4 +73,15 @@ func ejecutarEstacionamiento(park *models.Estacionamiento, contenedor *fyne.Cont
 		}
 		coord.Wait()
 	}()
+}
+
+func moverVehiculo(carro fyne.CanvasObject, espacio int) {
+	x := 200
+	y := 200
+
+	// Calcula las coordenadas en línea para una sola fila
+	x = espacioWidth*espacio + x
+	y = 400
+
+	carro.Move(fyne.NewPos(float32(x), float32(y)))
 }
