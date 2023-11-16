@@ -1,82 +1,70 @@
-// vista.go
 package views
 
+
+
 import (
-	"fmt"
+	"image/color"
+	"math/rand"
+	"simulador/models"
 	"sync"
-	"fyne.io/fyne/v2/app"
+	"time"
+
+	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/widget"
-	"image/color"
-	"simulador/models"
-    "fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/app"
 )
 
-func SimulacionEstacionamiento() {
-	// Crear una aplicación y una ventana
-	a := app.New()
-	w := a.NewWindow("Simulación de Estacionamiento")
+func IniciarLlegada(numVehiculos int) {
+	appMain := app.New()
+	rand.Seed(time.Now().UnixNano())
 
-	// Crear un estacionamiento
-	estacionamiento := models.NuevoEstacionamiento()
+	park := models.NuevoEstacionamiento(20)
+	ventana, contenedor := configurarVentana(appMain)
+	ejecutarEstacionamiento(park, contenedor, numVehiculos)
 
-	// Crear un semáforo para controlar la entrada al estacionamiento
-	sem := &sync.Mutex{}
+	ventana.ShowAndRun()
+}
 
-	// Crear un canal para señalar cuando todos los vehículos han llegado
-	done := make(chan bool)
+func configurarVentana(appMain fyne.App) (fyne.Window, *fyne.Container) {
+	vent := appMain.NewWindow("Estacionamiento Up xD")
+	vent.Resize(fyne.NewSize(800, 500))
+	vent.SetFixedSize(true)
 
-	// Crear un widget de imagen para cada vehículo en la simulación
-	carros := make([]*canvas.Image, models.NumVehiculos)
-	for i := range carros {
-		carros[i] = canvas.NewImageFromFile("assets/carro2.png") // Aquí es donde agregas la ruta a tu imagen
-		carros[i].FillMode = canvas.ImageFillOriginal
-		carros[i].Hide() // Ocultar la imagen inicialmente
+	imgRecurso, _ := fyne.LoadResourceFromPath("assets/bg.png")
+	img := canvas.NewImageFromResource(imgRecurso)
+	img.Resize(fyne.NewSize(800, 500))
+
+	cont := container.NewWithoutLayout(img)
+
+	// Agrega círculos y rectángulos para representar los espacios del estacionamiento
+	numEspacios := 20
+	espacioWidth := 40
+	for i := 0; i < numEspacios; i++ {
+		circulo := canvas.NewCircle(color.Black)
+		circulo.Resize(fyne.NewSize(20, 20))
+		cont.Add(circulo)
+		circulo.Move(fyne.NewPos(float32(160+20*i), 200))
+
+		rectangulo := canvas.NewRectangle(color.RGBA{R: 0, G: 255, B: 0, A: 150}) // Color verde semi-transparente
+		rectangulo.Resize(fyne.NewSize(float32(espacioWidth), 20))
+		cont.Add(rectangulo)
+		rectangulo.Move(fyne.NewPos(float32(160+20*i), 200))
 	}
 
-	// Crear y lanzar los vehículos
-	go models.CrearVehiculos(sem, done, carros)
+	vent.SetContent(cont)
+	return vent, cont
+}
 
-	// Crear un widget para cada cajón en el estacionamiento
-	cajones := make([]*canvas.Rectangle, models.CapacidadMaxima)
-	for i := range cajones {
-		cajones[i] = canvas.NewRectangle(color.RGBA{0, 255, 0, 255}) // Verde para cajón libre
-		cajones[i].SetMinSize(fyne.NewSize(10, 10)) // Establecer el tamaño del rectángulo
-	}
-
-	// Crear un botón que inicia la simulación
-	boton := widget.NewButton("Iniciar Simulación", func() {
-		// Actualizar el estado de los cajones
-		for i, cajon := range estacionamiento.Cajones { // Asegúrate de que Cajones es un campo exportado en tu estructura Estacionamiento
-			if cajon {
-				cajones[i].FillColor = color.RGBA{255, 0, 0, 255} // Rojo para cajón ocupado
-				cajones[i].Refresh()
-			} else {
-				cajones[i].FillColor = color.RGBA{0, 255, 0, 255} // Verde para cajón libre
-				cajones[i].Refresh()
-			}
+func ejecutarEstacionamiento(park *models.Estacionamiento, contenedor *fyne.Container, numVehiculos int) {
+	var coord sync.WaitGroup
+	go func() {
+		time.Sleep(2 * time.Second)
+		for i := 1; i <= numVehiculos; i++ {
+			coord.Add(1)
+			go park.VehiculoEntra(i, &coord, contenedor)
+			time.Sleep(time.Duration(rand.ExpFloat64() * float64(time.Second)))
 		}
-
-		// Esperar a que todos los vehículos hayan llegado
-		<-done
-
-		// Imprimir un mensaje final
-		fmt.Println("Todos los vehículos han llegado.")
-	})
-
-	// Añadir el botón y los widgets de los cajones a la ventana y mostrarla
-	contenedorCajones := container.NewHBox() // Contenedor para los cajones
-	for _, cajon := range cajones {
-		contenedorCajones.Add(cajon)
-	}
-
-	contenedorCarros := container.NewVBox() // Contenedor para los carros
-	for _, carro := range carros {
-		contenedorCarros.Add(carro)
-	}
-
-	contenedor := container.NewVBox(boton, contenedorCajones, contenedorCarros) // Añadir el contenedor de cajones y los carros después del botón
-	w.SetContent(contenedor)
-	w.ShowAndRun()
+		coord.Wait()
+	}()
 }

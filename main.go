@@ -1,9 +1,13 @@
 package main
 
 import (
-	"simulador/views" // Reemplaza "tu_paquete" con el nombre de tu paquete
+	"simulador/views"
+)
+
+const (
+	numCarros = 100
 )
 
 func main() {
-	views.SimulacionEstacionamiento()
+	views.IniciarLlegada(numCarros)
 }
