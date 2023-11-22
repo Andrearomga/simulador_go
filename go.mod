@@ -10,10 +10,10 @@ require (
 	github.com/fredbi/uri v1.1.0 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/fyne-io/gl-js v0.0.0-20230506162202-1fdaa286a934 // indirect
-	github.com/fyne-io/glfw-js v0.0.0-20220517201726-bebc2019cd33 // indirect
+	github.com/fyne-io/glfw-js v0.0.0-20231117203605-bc7c6f97d52f // indirect
 	github.com/fyne-io/image v0.0.0-20230811065323-ed435dc8bca6 // indirect
 	github.com/go-gl/gl v0.0.0-20231021071112-07e5d0ea2e71 // indirect
-	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20231102141658-eca20e8abded // indirect
+	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20231117230948-b8b00452e321 // indirect
 	github.com/go-text/render v0.0.0-20230619120952-35bccb6164b8 // indirect
 	github.com/go-text/typesetting v0.0.0-20231113130822-cf4b5dada737 // indirect
 	github.com/godbus/dbus/v5 v5.1.0 // indirect

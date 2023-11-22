@@ -88,6 +88,8 @@ github.com/fyne-io/glfw-js v0.0.0-20220120001248-ee7290d23504 h1:+31CdF/okdokeFN
 github.com/fyne-io/glfw-js v0.0.0-20220120001248-ee7290d23504/go.mod h1:gLRWYfYnMA9TONeppRSikMdXlHQ97xVsPojddUv3b/E=
 github.com/fyne-io/glfw-js v0.0.0-20220517201726-bebc2019cd33 h1:0Ayg0/do/sqX2R7NonoLZvWxGrd9utTVf3A0QvCbC88=
 github.com/fyne-io/glfw-js v0.0.0-20220517201726-bebc2019cd33/go.mod h1:gLRWYfYnMA9TONeppRSikMdXlHQ97xVsPojddUv3b/E=
+github.com/fyne-io/glfw-js v0.0.0-20231117203605-bc7c6f97d52f h1:D1cZO8j1QjIyuam3U3wDGVl2CaLdT6LbaynApBepqYM=
+github.com/fyne-io/glfw-js v0.0.0-20231117203605-bc7c6f97d52f/go.mod h1:gLRWYfYnMA9TONeppRSikMdXlHQ97xVsPojddUv3b/E=
 github.com/fyne-io/image v0.0.0-20220602074514-4956b0afb3d2 h1:hnLq+55b7Zh7/2IRzWCpiTcAvjv/P8ERF+N7+xXbZhk=
 github.com/fyne-io/image v0.0.0-20220602074514-4956b0afb3d2/go.mod h1:eO7W361vmlPOrykIg+Rsh1SZ3tQBaOsfzZhsIOb/Lm0=
 github.com/fyne-io/image v0.0.0-20230811065323-ed435dc8bca6 h1:kZNUHSV3ZTddRiWy5JHK6RgB3zdH/875SYXmt3EoNvQ=
@@ -105,6 +107,8 @@ github.com/go-gl/glfw/v3.3/glfw v0.0.0-20221017161538-93cebf72946b h1:GgabKamyOY
 github.com/go-gl/glfw/v3.3/glfw v0.0.0-20221017161538-93cebf72946b/go.mod h1:tQ2UAYgL5IevRw8kRxooKSPJfGvJ9fJQFa0TUsXzTg8=
 github.com/go-gl/glfw/v3.3/glfw v0.0.0-20231102141658-eca20e8abded h1:W0pE6Cn9okp21yrBqVzPDf2NLK6J+i/f6XlqxQJ9iOw=
 github.com/go-gl/glfw/v3.3/glfw v0.0.0-20231102141658-eca20e8abded/go.mod h1:tQ2UAYgL5IevRw8kRxooKSPJfGvJ9fJQFa0TUsXzTg8=
+github.com/go-gl/glfw/v3.3/glfw v0.0.0-20231117230948-b8b00452e321 h1:YZupvqQgGJlwN5cu1S0Jhxkrd9oPP9YHPub2sJvQXSw=
+github.com/go-gl/glfw/v3.3/glfw v0.0.0-20231117230948-b8b00452e321/go.mod h1:tQ2UAYgL5IevRw8kRxooKSPJfGvJ9fJQFa0TUsXzTg8=
 github.com/go-text/render v0.0.0-20230619120952-35bccb6164b8 h1:VkKnvzbvHqgEfm351rfr8Uclu5fnwq8HP2ximUzJsBM=
 github.com/go-text/render v0.0.0-20230619120952-35bccb6164b8/go.mod h1:h29xCucjNsDcYb7+0rJokxVwYAq+9kQ19WiFuBKkYtc=
 github.com/go-text/typesetting v0.0.0-20230616162802-9c17dd34aa4a h1:VjN8ttdfklC0dnAdKbZqGNESdERUxtE3l8a/4Grgarc=
