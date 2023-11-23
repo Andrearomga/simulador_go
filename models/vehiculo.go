@@ -16,7 +16,7 @@ type Vehiculo struct {
 // NuevoVehiculo crea un nuevo vehículo y lo agrega al contenedor proporcionado
 func NuevoVehiculo(contenedor *fyne.Container, imagenPath string) *Vehiculo {
 	imagen := canvas.NewImageFromFile(imagenPath)
-	imagen.Resize(fyne.NewSize(40, 40)) // Ajusta el tamaño según sea necesario
+	imagen.Resize(fyne.NewSize(40, 40)) 
 
 	contenedor.Add(imagen)
 	imagen.Move(fyne.NewPos(30, 260))
@@ -34,8 +34,7 @@ func NuevoVehiculo(contenedor *fyne.Container, imagenPath string) *Vehiculo {
 func MoverVehiculo(vehiculo *Vehiculo, espacio int) {
 	x := 200
 	y := 200
-
-	// Calcula las coordenadas en línea para una sola fila
+	
 	x = 40*espacio + x
 	y = 400
 

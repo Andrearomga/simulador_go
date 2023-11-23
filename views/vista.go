@@ -65,11 +65,11 @@ func configurarVentana(appPrincipal fyne.App, numVehiculos int, estacionamiento 
 	cont := container.NewWithoutLayout()
 
 	for i := 0; i < 20; i++ {
-		rectangulo := canvas.NewRectangle(color.RGBA{R: 0, G: 255, B: 0, A: 150}) // Color verde semi-transparente
+		rectangulo := canvas.NewRectangle(color.RGBA{R: 0, G: 255, B: 0, A: 150}) 
 		rectangulo.Resize(fyne.NewSize(float32(anchoEspacio), float32(altoEspacio)))
-		rectangulo.FillColor = color.RGBA{R: 200, G: 200, B: 200, A: 150}        // Color de fondo más claro
-		rectangulo.StrokeColor = color.Black                                       // Color del borde
-		rectangulo.StrokeWidth = 1                                                // Ancho del borde
+		rectangulo.FillColor = color.RGBA{R: 200, G: 200, B: 200, A: 150}       
+		rectangulo.StrokeColor = color.Black                                     
+		rectangulo.StrokeWidth = 1                                              
 
 		cont.Add(rectangulo)
 		models.MoverVehiculo(&models.Vehiculo{ObjetoVehiculo: rectangulo}, i)
